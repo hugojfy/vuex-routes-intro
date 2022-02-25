@@ -32,6 +32,8 @@
 </template>
 
 <script>
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+
 export default {
     name: 'Login',
     components:{
@@ -49,12 +51,25 @@ export default {
             if(password!==passwordConfirm){
                 return this.errorMessage="Las contraseñas no coinciden";
             }
-            this.errorMessage="";
-            this.$store.dispatch('signupAction',{
-                name:this.newAccount.name,
-                email:this.newAccount.email
+            
+            //add to firebase
+            const auth = getAuth();
+            createUserWithEmailAndPassword(auth, email, password)
+            .then(() => {
+                // Signed in
+                //const user = userCredential.user;
+                this.errorMessage="";
+                this.$store.dispatch('signupAction',{
+                    name:email,
+                    email:email
+                });
+                this.$router.push('/');
+                // ...
+            })
+            .catch(() => {
+                this.errorMessage="Error al crear el usuario";
+                // ..
             });
-            this.$router.push('/');
         }
     },
     data() {

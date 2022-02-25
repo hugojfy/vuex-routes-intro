@@ -7,13 +7,13 @@
     <form class="sign-in-form">
         <div class="mb-3">
             <label for="exampleInputEmail1" class="form-label">Correo Electónico</label>
-            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" v-model="userData.email">
         </div>
         <div class="mb-3">
             <label for="exampleInputPassword1" class="form-label">Contraseña</label>
-            <input type="password" class="form-control" id="exampleInputPassword1">
+            <input type="password" class="form-control" id="exampleInputPassword1" v-model="userData.password">
         </div>
-        <button type="submit" class="btn btn-primary" @click.prevent="errorMessage='No estás registrado'">Iniciar Sesión</button>
+        <button type="submit" class="btn btn-primary" @click.prevent="login()">Iniciar Sesión</button>
         <div class="mb-3">
             <a @click="setHaveAccount()"  class="link-account">No tengo cuenta</a>
         </div>
@@ -22,6 +22,9 @@
 </template>
 
 <script>
+import {getAuth, signInWithEmailAndPassword} from 'firebase/auth';
+
+
 export default {
     name: 'Login',
     components:{
@@ -32,9 +35,33 @@ export default {
     },
     data() {
         return {
-            errorMessage:""
+            errorMessage:"",
+            userData:{
+                email:'',
+                password:''
+            }
         }
-    },
+    },methods:{
+        login(){
+            const auth = getAuth();
+            signInWithEmailAndPassword(auth, this.userData.email, this.userData.password)
+            .then((userCredential) => {
+                // Signed in
+                const user = userCredential.user;
+                console.log(user);
+                this.$store.dispatch('signupAction',{
+                name:user.email,
+                email:user.email
+                });
+                this.$router.push('/');
+            })
+            .catch((error) => {
+                const errorMessage = error.message;
+                console.log(errorMessage);
+                this.errorMessage="Usuario Invalido"
+            });
+        }
+    }
 }
 </script>
 
